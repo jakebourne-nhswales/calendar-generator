@@ -1,0 +1,24 @@
+{
+  "name": "calendar-generator",
+  "version": "1.0.0",
+  "description": "Personalised Calendar Generator",
+  "homepage": "https://github.com/jakebourne-nhswales/calendar-generator#readme",
+  "bugs": {
+    "url": "https://github.com/jakebourne-nhswales/calendar-generator/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jakebourne-nhswales/calendar-generator.git"
+  },
+  "license": "ISC",
+  "author": "Jake Bourne",
+  "type": "commonjs",
+  "main": "src/calendar-generator.js",
+  "scripts": {
+    "start": "node src/calendar-generator.js",
+    "dec2025": "node src/calendar-generator.js 12 2025"
+  },
+  "dependencies": {
+    "puppeteer": "^24.31.0"
+  }
+}

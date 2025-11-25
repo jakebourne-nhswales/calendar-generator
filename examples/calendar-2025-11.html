@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>November 2025 Calendar</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #bdc3c7;
+            --header-bg: #34495e;
+            --header-text: #ffffff;
+            --weekend-bg: #ecf0f1;
+            --today-bg: #fff3cd;
+        }
+
+        .theme-ocean {
+            --primary-color: #006994;
+            --secondary-color: #00a8cc;
+            --accent-color: #f39c12;
+            --background-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --border-color: #81c7d4;
+            --header-bg: #005073;
+            --header-text: #ffffff;
+            --weekend-bg: #e8f4f8;
+            --today-bg: #d4edda;
+        }
+
+        .theme-sunset {
+            --primary-color: #c0392b;
+            --secondary-color: #e67e22;
+            --accent-color: #f39c12;
+            --background-color: #fef5e7;
+            --text-color: #2c3e50;
+            --border-color: #f39c12;
+            --header-bg: #d35400;
+            --header-text: #ffffff;
+            --weekend-bg: #fdebd0;
+            --today-bg: #ffe5cc;
+        }
+
+        .theme-minimalist {
+            --primary-color: #000000;
+            --secondary-color: #555555;
+            --accent-color: #000000;
+            --background-color: #ffffff;
+            --text-color: #000000;
+            --border-color: #cccccc;
+            --header-bg: #f5f5f5;
+            --header-text: #000000;
+            --weekend-bg: #fafafa;
+            --today-bg: #e8e8e8;
+        }
+
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+        }
+
+        .calendar-container {
+            width: 210mm;
+            height: 297mm;
+            background: var(--background-color);
+            padding: 15mm;
+        }
+
+        .calendar-header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: var(--header-bg);
+            color: var(--header-text);
+            border-radius: 8px;
+        }
+
+        .calendar-header h1 {
+            font-size: 28px;
+            margin-bottom: 3px;
+        }
+
+        .calendar-header .year {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .fortnights {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            height: calc(100% - 100px);
+        }
+
+        .fortnight {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .days-grid {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            gap: 2px;
+            padding: 8px;
+            overflow: hidden;
+        }
+
+        .day-card {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px 12px;
+            background: white;
+            min-height: 48px;
+            transition: all 0.2s ease;
+        }
+
+        .day-card.weekend {
+            background-color: var(--weekend-bg);
+        }
+
+        .day-card.today {
+            background-color: var(--today-bg);
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .day-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            flex-shrink: 0;
+            min-width: 50px;
+        }
+
+        .day-name {
+            font-weight: 700;
+            font-size: 11px;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .day-number {
+            font-weight: 700;
+            font-size: 22px;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+
+        .day-card.weekend .day-name {
+            color: var(--accent-color);
+        }
+
+        .day-card.weekend .day-number {
+            color: var(--accent-color);
+        }
+
+        .day-content {
+            flex: 1;
+            margin-left: 12px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .events-card {
+            background: rgba(0,0,0,0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px 10px;
+            max-width: 70%;
+            min-width: 190px;
+        }
+
+        .event-line {
+            font-size: 11px;
+            font-style: italic;
+            color: var(--text-color);
+            opacity: 0.8;
+            line-height: 1.4;
+            margin-bottom: 2px;
+        }
+
+        .event-line:last-child {
+            margin-bottom: 0;
+        }
+
+        .event-line.birthday {
+            color: #e91e63;
+        }
+
+        .event-line.anniversary {
+            color: #9c27b0;
+        }
+
+        .event-line.public {
+            color: #2196f3;
+        }
+
+        .event-line.custom {
+            color: #ff9800;
+        }
+
+        .day-card.weekend .events-card {
+            background: rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container ">
+        <div class="calendar-header">
+            <h1>November</h1>
+            <div class="year">2025</div>
+        </div>
+
+        <div class="fortnights">
+            <div class="fortnight">
+                <div class="days-grid">
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sat</div>
+            <div class="day-number">1</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sun</div>
+            <div class="day-number">2</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Mon</div>
+            <div class="day-number">3</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Tue</div>
+            <div class="day-number">4</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Wed</div>
+            <div class="day-number">5</div>
+          </div>
+          <div class="day-content"><div class="events-card"><div class="event-line birthday">Sarah's Birthday</div><div class="event-line birthday">Cake at noon</div></div></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Thu</div>
+            <div class="day-number">6</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Fri</div>
+            <div class="day-number">7</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sat</div>
+            <div class="day-number">8</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sun</div>
+            <div class="day-number">9</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Mon</div>
+            <div class="day-number">10</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Tue</div>
+            <div class="day-number">11</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Wed</div>
+            <div class="day-number">12</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Thu</div>
+            <div class="day-number">13</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Fri</div>
+            <div class="day-number">14</div>
+          </div>
+          <div class="day-content"><div class="events-card"><div class="event-line anniversary">Wedding Anniversary</div><div class="event-line anniversary">Dinner reservation 7pm</div></div></div>
+        </div>
+      
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sat</div>
+            <div class="day-number">15</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      </div>
+            </div>
+
+            <div class="fortnight">
+                <div class="days-grid">
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sun</div>
+            <div class="day-number">16</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Mon</div>
+            <div class="day-number">17</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Tue</div>
+            <div class="day-number">18</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Wed</div>
+            <div class="day-number">19</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Thu</div>
+            <div class="day-number">20</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Fri</div>
+            <div class="day-number">21</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sat</div>
+            <div class="day-number">22</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sun</div>
+            <div class="day-number">23</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Mon</div>
+            <div class="day-number">24</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card today">
+          <div class="day-info">
+            <div class="day-name">Tue</div>
+            <div class="day-number">25</div>
+          </div>
+          <div class="day-content"><div class="events-card"><div class="event-line public">Christmas Day</div><div class="event-line public">Family gathering</div></div></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Wed</div>
+            <div class="day-number">26</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Thu</div>
+            <div class="day-number">27</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card">
+          <div class="day-info">
+            <div class="day-name">Fri</div>
+            <div class="day-number">28</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sat</div>
+            <div class="day-number">29</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      
+        <div class="day-card weekend">
+          <div class="day-info">
+            <div class="day-name">Sun</div>
+            <div class="day-number">30</div>
+          </div>
+          <div class="day-content"></div>
+        </div>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
