@@ -200,73 +200,73 @@ const Layouts = {
       }
     },
     
-    // Weekly grid layout with flexible sizing
-    weekly: {
-      name: 'Weekly',
-      supportedSizes: ['A4-portrait', 'A4-landscape', 'A5-portrait'],
+  // Weekly grid layout with flexible sizing
+  weekly: {
+    name: 'Weekly',
+    supportedSizes: ['A4-portrait', 'A4-landscape', 'A5-portrait', 'A5-landscape'],
+    
+    getWeeksInMonth(year, month) {
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const daysInMonth = lastDay.getDate();
       
-      getWeeksInMonth(year, month) {
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
+      const weeks = [];
+      let currentWeek = [];
+      
+      // Add empty cells for days before month starts
+      const startDayOfWeek = firstDay.getDay();
+      for (let i = 0; i < startDayOfWeek; i++) {
+        currentWeek.push(null);
+      }
+      
+      // Add all days in month
+      for (let day = 1; day <= daysInMonth; day++) {
+        currentWeek.push(day);
         
-        const weeks = [];
-        let currentWeek = [];
-        
-        // Add empty cells for days before month starts
-        const startDayOfWeek = firstDay.getDay();
-        for (let i = 0; i < startDayOfWeek; i++) {
+        if (currentWeek.length === 7) {
+          weeks.push(currentWeek);
+          currentWeek = [];
+        }
+      }
+      
+      // Add remaining cells for last week
+      if (currentWeek.length > 0) {
+        while (currentWeek.length < 7) {
           currentWeek.push(null);
         }
-        
-        // Add all days in month
-        for (let day = 1; day <= daysInMonth; day++) {
-          currentWeek.push(day);
-          
-          if (currentWeek.length === 7) {
-            weeks.push(currentWeek);
-            currentWeek = [];
-          }
-        }
-        
-        // Add remaining cells for last week
-        if (currentWeek.length > 0) {
-          while (currentWeek.length < 7) {
-            currentWeek.push(null);
-          }
-          weeks.push(currentWeek);
-        }
-        
-        return weeks;
-      },
+        weeks.push(currentWeek);
+      }
       
-      generateDayCell(day, month, year) {
-        if (!day) {
-          return '<div class="week-day empty"></div>';
-        }
-        
-        const currentDate = new Date(year, month, day);
-        const dayOfWeek = currentDate.getDay();
-        const dateKey = Utils.formatDateKey(month, day);
-        const today = new Date();
-        
-        let classes = 'week-day';
-        if (dayOfWeek === 0 || dayOfWeek === 6) classes += ' weekend';
-        if (today.getDate() === day && today.getMonth() === month && today.getFullYear() === year) {
-          classes += ' today';
-        }
-        
-        const eventHTML = Events.getEventHTML(dateKey, year);
-        
-        return `
-          <div class="${classes}">
-            <div class="week-day-number">${day}</div>
-            <div class="week-day-events">${eventHTML}</div>
-          </div>
-        `;
-      },
+      return weeks;
+    },
+    
+    generateDayCell(day, month, year) {
+      if (!day) {
+        return '<div class="week-day empty"></div>';
+      }
       
-      generateLayout(month, year, options = {}) {
+      const currentDate = new Date(year, month, day);
+      const dayOfWeek = currentDate.getDay();
+      const dateKey = Utils.formatDateKey(month, day);
+      const today = new Date();
+      
+      let classes = 'week-day';
+      if (dayOfWeek === 0 || dayOfWeek === 6) classes += ' weekend';
+      if (today.getDate() === day && today.getMonth() === month && today.getFullYear() === year) {
+        classes += ' today';
+      }
+      
+      const eventHTML = Events.getEventHTML(dateKey, year);
+      
+      return `
+        <div class="${classes}">
+          <div class="week-day-number">${day}</div>
+          <div class="week-day-events">${eventHTML}</div>
+        </div>
+      `;
+    },
+      
+    generateLayout(month, year, options = {}) {
         const weeks = this.getWeeksInMonth(year, month);
         
         let html = '<div class="weekly-grid">';
@@ -297,19 +297,29 @@ const Layouts = {
             cellHeight: '80px',
             fontSize: '10px',
             dayNumSize: '18px',
-            eventPadding: '4px'
+            eventPadding: '4px',
+            headerSize: '12px'
           },
           'A4-landscape': {
             cellHeight: '100px',
             fontSize: '11px',
             dayNumSize: '20px',
-            eventPadding: '6px'
+            eventPadding: '6px',
+            headerSize: '13px'
           },
           'A5-portrait': {
-            cellHeight: '60px',
-            fontSize: '9px',
-            dayNumSize: '16px',
-            eventPadding: '3px'
+            cellHeight: '50px',
+            fontSize: '8px',
+            dayNumSize: '14px',
+            eventPadding: '2px',
+            headerSize: '10px'
+          },
+          'A5-landscape': {
+            cellHeight: '42px',
+            fontSize: '7px',
+            dayNumSize: '12px',
+            eventPadding: '2px',
+            headerSize: '9px'
           }
         };
         
@@ -333,13 +343,13 @@ const Layouts = {
           }
           
           .week-header {
-            padding: 8px;
+            padding: 6px;
             text-align: center;
             font-weight: 700;
-            font-size: 12px;
+            font-size: ${config.headerSize};
             color: white;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
             border-right: 1px solid rgba(255,255,255,0.2);
           }
           
@@ -381,7 +391,7 @@ const Layouts = {
             font-weight: 700;
             font-size: ${config.dayNumSize};
             color: var(--primary-color);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
           }
           
           .week-day.weekend .week-day-number {
@@ -403,8 +413,8 @@ const Layouts = {
           
           .week-day-events .event-line {
             font-size: ${config.fontSize};
-            line-height: 1.3;
-            margin-bottom: 2px;
+            line-height: 1.2;
+            margin-bottom: 1px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -413,5 +423,5 @@ const Layouts = {
       }
     }
   };
-
+  
   module.exports = Layouts;

@@ -17,7 +17,8 @@
   "scripts": {
     "fortnight": "node src/calendar-generator.js",
     "dec2025": "node src/calendar-generator.js 12 2025",
-    "weekly": "node src/calendar-generator.js 12 2025 ocean weekly A4-landscape"
+    "weekly": "node src/calendar-generator.js 12 2025 ocean weekly A4-landscape",
+    "weeklyA5": "node src/calendar-generator.js 03 2026 ocean weekly A5-landscape"
   },
   "dependencies": {
     "puppeteer": "^24.31.0"

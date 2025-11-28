@@ -81,7 +81,7 @@ const Themes = {
           --primary-color: #8B0000;
           --secondary-color: #A52A2A;
           --accent-color: #DC143C;
-          --background-color: #4A0000;
+          --background-color: #FFFFFF;
           --text-color: #2c3e50;
           --border-color: #8B0000;
           --header-bg: #4A0000;
@@ -91,17 +91,17 @@ const Themes = {
         }
         
         .theme-darkred .day-info {
-          background: #4A0000;
+          background: #000000;
           padding: 8px;
           border-radius: 4px;
         }
         
         .theme-darkred .day-name {
-          color: #FFB6C1;
+          color:rgba(230, 13, 45, 0.82);
         }
         
         .theme-darkred .day-number {
-          color: #FFB6C1;
+          color:rgba(60, 98, 247, 0.96);
         }
         
         .theme-darkred .day-card.weekend .day-name {
@@ -124,4 +124,3 @@ const Themes = {
 
 
   module.exports = Themes;
-  

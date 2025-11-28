@@ -3,7 +3,6 @@
 
 const puppeteer = require('puppeteer');
 const fs = require('fs');
-const path = require('path');
 
 const Utils = require('./utils');
 const Events = require('./events');
@@ -30,7 +29,8 @@ function generateHTML(month, year, options = {}) {
   const pageSizes = {
     'A4-portrait': { width: '210mm', height: '297mm', orientation: 'portrait' },
     'A4-landscape': { width: '297mm', height: '210mm', orientation: 'landscape' },
-    'A5-portrait': { width: '148mm', height: '210mm', orientation: 'portrait' }
+    'A5-portrait': { width: '148mm', height: '210mm', orientation: 'portrait' },
+    'A5-landscape': { width: '210mm', height: '148mm', orientation: 'landscape' }
   };
   
   const size = pageSizes[pageSize] || pageSizes['A4-portrait'];
@@ -167,7 +167,8 @@ async function generatePDF(month, year, options = {}) {
   const formatMap = {
     'A4-portrait': { format: 'A4', landscape: false },
     'A4-landscape': { format: 'A4', landscape: true },
-    'A5-portrait': { format: 'A5', landscape: false }
+    'A5-portrait': { format: 'A5', landscape: false },
+    'A5-landscape': { format: 'A5', landscape: true }
   };
   
   const pdfConfig = formatMap[pageSize] || formatMap['A4-portrait'];
@@ -201,7 +202,7 @@ if (require.main === module) {
   // Show help if requested
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`
-Calendar Generator - Modular Architecture
+Calendar Generator - Command-Line Usage
 
 USAGE:
   node calendar-generator.js [month] [year] [theme] [layout] [pageSize] [options]
@@ -211,7 +212,7 @@ ARGUMENTS:
   year        Year (e.g., 2025), default: current year
   theme       Theme name: default, ocean, sunset, minimalist, darkred
   layout      Layout name: fortnight, weekly
-  pageSize    Page size: A4-portrait, A4-landscape, A5-portrait
+  pageSize    Page size: A4-portrait, A4-landscape, A5-portrait, A5-landscape
 
 OPTIONS:
   --events=FILE          Load events from JSON file
@@ -241,6 +242,7 @@ SUPPORTED SIZES:
   - A4-portrait (210mm x 297mm)
   - A4-landscape (297mm x 210mm)
   - A5-portrait (148mm x 210mm)
+  - A5-landscape (210mm x 148mm)
 
 LAYOUTS:
   - fortnight: Two-column layout (days 1-15, days 16-end)
@@ -304,3 +306,15 @@ Generating calendar:
       process.exit(1);
     });
 }
+
+// ============================================================================
+// EXPORTS
+// ============================================================================
+module.exports = { 
+  generateHTML, 
+  generatePDF,
+  Utils,
+  Themes,
+  Layouts,
+  Events
+};
