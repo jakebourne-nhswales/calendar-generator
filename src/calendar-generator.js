@@ -5,69 +5,45 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
 
-// Sample events - customize as needed
-const events = {
-  '2025-11-05': {
-    type: 'birthday',
-    lines: ["Sarah's Birthday", "Cake at noon", ""]
-  },
-  '2025-11-14': {
-    type: 'anniversary',
-    lines: ["Wedding Anniversary", "Dinner reservation 7pm", ""]
-  },
-  '2025-11-25': {
-    type: 'public',
-    lines: ["Christmas Day", "Family gathering", ""]
-  }
-};
+const Utils = require('./utils');
+const Events = require('./events');
+const Themes = require('./themes');
+const Layouts = require('./layouts');
 
-const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                    'July', 'August', 'September', 'October', 'November', 'December'];
-const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function generateHTML(month, year, theme = '') {
-  const lastDay = new Date(year, month + 1, 0);
-  const daysInMonth = lastDay.getDate();
+// ============================================================================
+// HTML GENERATOR
+// ============================================================================
+function generateHTML(month, year, options = {}) {
+  const {
+    theme = 'default',
+    layout = 'fortnight',
+    pageSize = 'A4-portrait',
+    withImage = false,
+    imagePath = null
+  } = options;
   
-  function generateFortnight(fortnightNum) {
-    const startDay = fortnightNum === 1 ? 1 : 16;
-    const endDay = fortnightNum === 1 ? 15 : daysInMonth;
-    const today = new Date();
-    let html = '';
-    
-    for (let day = startDay; day <= endDay; day++) {
-      const currentDate = new Date(year, month, day);
-      const dayOfWeek = currentDate.getDay();
-      const dayName = dayNames[dayOfWeek];
-      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      
-      let classes = 'day-card';
-      if (dayOfWeek === 0 || dayOfWeek === 6) classes += ' weekend';
-      if (today.getDate() === day && today.getMonth() === month && today.getFullYear() === year) {
-        classes += ' today';
-      }
-      
-      let eventHTML = '';
-      if (events[dateKey]) {
-        const eventLines = events[dateKey].lines
-          .filter(line => line.trim())
-          .map(line => `<div class="event-line ${events[dateKey].type}">${line}</div>`)
-          .join('');
-        eventHTML = `<div class="events-card">${eventLines}</div>`;
-      }
-      
-      html += `
-        <div class="${classes}">
-          <div class="day-info">
-            <div class="day-name">${dayName}</div>
-            <div class="day-number">${day}</div>
-          </div>
-          <div class="day-content">${eventHTML}</div>
-        </div>
-      `;
-    }
-    
-    return html;
+  const layoutObj = Layouts[layout];
+  const themeClass = theme === 'default' ? '' : `theme-${theme}`;
+  
+  // Page size configurations
+  const pageSizes = {
+    'A4-portrait': { width: '210mm', height: '297mm', orientation: 'portrait' },
+    'A4-landscape': { width: '297mm', height: '210mm', orientation: 'landscape' },
+    'A5-portrait': { width: '148mm', height: '210mm', orientation: 'portrait' }
+  };
+  
+  const size = pageSizes[pageSize] || pageSizes['A4-portrait'];
+  
+  // Image page HTML
+  let imagePageHTML = '';
+  if (withImage && imagePath) {
+    imagePageHTML = `
+      <div class="image-page" style="width: ${size.width}; height: ${size.height};">
+        <img src="${imagePath}" alt="Calendar image" style="width: 100%; height: 100%; object-fit: cover;">
+      </div>
+      <div style="page-break-after: always;"></div>
+    `;
   }
   
   return `<!DOCTYPE html>
@@ -75,62 +51,10 @@ function generateHTML(month, year, theme = '') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${monthNames[month]} ${year} Calendar</title>
+    <title>${Utils.monthNames[month]} ${year} Calendar</title>
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --background-color: #ffffff;
-            --text-color: #2c3e50;
-            --border-color: #bdc3c7;
-            --header-bg: #34495e;
-            --header-text: #ffffff;
-            --weekend-bg: #ecf0f1;
-            --today-bg: #fff3cd;
-        }
-
-        .theme-ocean {
-            --primary-color: #006994;
-            --secondary-color: #00a8cc;
-            --accent-color: #f39c12;
-            --background-color: #f8f9fa;
-            --text-color: #2c3e50;
-            --border-color: #81c7d4;
-            --header-bg: #005073;
-            --header-text: #ffffff;
-            --weekend-bg: #e8f4f8;
-            --today-bg: #d4edda;
-        }
-
-        .theme-sunset {
-            --primary-color: #c0392b;
-            --secondary-color: #e67e22;
-            --accent-color: #f39c12;
-            --background-color: #fef5e7;
-            --text-color: #2c3e50;
-            --border-color: #f39c12;
-            --header-bg: #d35400;
-            --header-text: #ffffff;
-            --weekend-bg: #fdebd0;
-            --today-bg: #ffe5cc;
-        }
-
-        .theme-minimalist {
-            --primary-color: #000000;
-            --secondary-color: #555555;
-            --accent-color: #000000;
-            --background-color: #ffffff;
-            --text-color: #000000;
-            --border-color: #cccccc;
-            --header-bg: #f5f5f5;
-            --header-text: #000000;
-            --weekend-bg: #fafafa;
-            --today-bg: #e8e8e8;
-        }
-
         @page {
-            size: A4;
+            size: ${size.width} ${size.height};
             margin: 15mm;
         }
 
@@ -145,183 +69,88 @@ function generateHTML(month, year, theme = '') {
             color: var(--text-color);
         }
 
+        .image-page {
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
         .calendar-container {
-            width: 210mm;
-            height: 297mm;
+            width: ${size.width};
+            height: ${size.height};
             background: var(--background-color);
             padding: 15mm;
+            margin: 0 auto;
         }
 
         .calendar-header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
             margin-bottom: 15px;
-            padding: 15px;
+            padding: 15px 20px;
             background: var(--header-bg);
             color: var(--header-text);
             border-radius: 8px;
         }
 
         .calendar-header h1 {
-            font-size: 28px;
-            margin-bottom: 3px;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 0;
         }
 
         .calendar-header .year {
-            font-size: 16px;
-            opacity: 0.9;
-        }
-
-        .fortnights {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            height: calc(100% - 100px);
-        }
-
-        .fortnight {
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .days-grid {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            gap: 2px;
-            padding: 8px;
-            overflow: hidden;
-        }
-
-        .day-card {
-            display: flex;
-            align-items: center;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 8px 12px;
-            background: white;
-            min-height: 48px;
-            transition: all 0.2s ease;
-        }
-
-        .day-card.weekend {
-            background-color: var(--weekend-bg);
-        }
-
-        .day-card.today {
-            background-color: var(--today-bg);
-            border: 2px solid var(--accent-color);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-
-        .day-info {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 2px;
-            flex-shrink: 0;
-            min-width: 50px;
-        }
-
-        .day-name {
+            font-size: 36px;
             font-weight: 700;
-            font-size: 11px;
-            color: var(--secondary-color);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            margin: 0;
         }
 
-        .day-number {
-            font-weight: 700;
-            font-size: 22px;
-            color: var(--primary-color);
-            line-height: 1;
-        }
-
-        .day-card.weekend .day-name {
-            color: var(--accent-color);
-        }
-
-        .day-card.weekend .day-number {
-            color: var(--accent-color);
-        }
-
-        .day-content {
-            flex: 1;
-            margin-left: 12px;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .events-card {
-            background: rgba(0,0,0,0.02);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            padding: 5px 10px;
-            max-width: 70%;
-            min-width: 190px;
-        }
-
-        .event-line {
-            font-size: 11px;
-            font-style: italic;
-            color: var(--text-color);
-            opacity: 0.8;
-            line-height: 1.4;
-            margin-bottom: 2px;
-        }
-
-        .event-line:last-child {
-            margin-bottom: 0;
-        }
-
-        .event-line.birthday {
-            color: #e91e63;
-        }
-
-        .event-line.anniversary {
-            color: #9c27b0;
-        }
-
-        .event-line.public {
-            color: #2196f3;
-        }
-
-        .event-line.custom {
-            color: #ff9800;
-        }
-
-        .day-card.weekend .events-card {
-            background: rgba(255,255,255,0.5);
-        }
+        ${Themes.getAllThemesCSS()}
+        ${layoutObj.getCSS(pageSize)}
     </style>
 </head>
 <body>
-    <div class="calendar-container ${theme}">
+    ${imagePageHTML}
+    <div class="calendar-container ${themeClass}">
         <div class="calendar-header">
-            <h1>${monthNames[month]}</h1>
+            <h1>${Utils.monthNames[month]}</h1>
             <div class="year">${year}</div>
         </div>
-
-        <div class="fortnights">
-            <div class="fortnight">
-                <div class="days-grid">${generateFortnight(1)}</div>
-            </div>
-
-            <div class="fortnight">
-                <div class="days-grid">${generateFortnight(2)}</div>
-            </div>
-        </div>
+        ${layoutObj.generateLayout(month, year, options)}
     </div>
 </body>
 </html>`;
 }
 
-async function generatePDF(month, year, theme = '', outputPath = null) {
-  const html = generateHTML(month, year, theme);
+// ============================================================================
+// PDF GENERATOR
+// ============================================================================
+async function generatePDF(month, year, options = {}) {
+  const {
+    theme = 'default',
+    layout = 'fortnight',
+    pageSize = 'A4-portrait',
+    outputPath = null,
+    eventsFile = null,
+    withImage = false,
+    imagePath = null
+  } = options;
+  
+  // Load events if specified
+  if (eventsFile) {
+    Events.loadEventsFromFile(eventsFile);
+  }
+  
+  const html = generateHTML(month, year, {
+    theme,
+    layout,
+    pageSize,
+    withImage,
+    imagePath
+  });
   
   // Save HTML file
   const htmlPath = outputPath ? outputPath.replace('.pdf', '.html') : 
@@ -334,10 +163,20 @@ async function generatePDF(month, year, theme = '', outputPath = null) {
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: 'networkidle0' });
   
+  // Determine PDF format based on pageSize
+  const formatMap = {
+    'A4-portrait': { format: 'A4', landscape: false },
+    'A4-landscape': { format: 'A4', landscape: true },
+    'A5-portrait': { format: 'A5', landscape: false }
+  };
+  
+  const pdfConfig = formatMap[pageSize] || formatMap['A4-portrait'];
+  
   const pdfPath = outputPath || `calendar-${year}-${String(month + 1).padStart(2, '0')}.pdf`;
   await page.pdf({
     path: pdfPath,
-    format: 'A4',
+    format: pdfConfig.format,
+    landscape: pdfConfig.landscape,
     printBackground: true,
     margin: {
       top: '0mm',
@@ -353,22 +192,115 @@ async function generatePDF(month, year, theme = '', outputPath = null) {
   return { htmlPath, pdfPath };
 }
 
-// CLI usage
+// ============================================================================
+// CLI INTERFACE
+// ============================================================================
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const month = args[0] ? parseInt(args[0]) - 1 : new Date().getMonth();
-  const year = args[1] ? parseInt(args[1]) : new Date().getFullYear();
-  const theme = args[2] || '';
   
-  console.log(`Generating calendar for ${monthNames[month]} ${year}...`);
-  generatePDF(month, year, theme)
+  // Show help if requested
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(`
+Calendar Generator - Modular Architecture
+
+USAGE:
+  node calendar-generator.js [month] [year] [theme] [layout] [pageSize] [options]
+
+ARGUMENTS:
+  month       Month number (1-12), default: current month
+  year        Year (e.g., 2025), default: current year
+  theme       Theme name: default, ocean, sunset, minimalist, darkred
+  layout      Layout name: fortnight, weekly
+  pageSize    Page size: A4-portrait, A4-landscape, A5-portrait
+
+OPTIONS:
+  --events=FILE          Load events from JSON file
+  --image=PATH           Add image on facing page
+  --output=FILE          Custom output file path
+
+EXAMPLES:
+  # Basic usage - current month, default theme and layout
+  node calendar-generator.js
+
+  # Specific month and year with theme
+  node calendar-generator.js 12 2025 darkred
+
+  # Weekly grid layout with A4 landscape
+  node calendar-generator.js 12 2025 ocean weekly A4-landscape
+
+  # With custom events file
+  node calendar-generator.js 12 2025 darkred weekly A4-portrait --events=events.json
+
+  # With image on facing page
+  node calendar-generator.js 12 2025 ocean fortnight A4-portrait --image=photo.jpg
+
+  # A5 portrait for small planners
+  node calendar-generator.js 3 2025 minimalist weekly A5-portrait
+
+SUPPORTED SIZES:
+  - A4-portrait (210mm x 297mm)
+  - A4-landscape (297mm x 210mm)
+  - A5-portrait (148mm x 210mm)
+
+LAYOUTS:
+  - fortnight: Two-column layout (days 1-15, days 16-end)
+  - weekly: Traditional calendar grid with weeks
+
+THEMES:
+  - default: Professional blue/gray
+  - ocean: Cool blues and teals
+  - sunset: Warm oranges and yellows
+  - minimalist: Clean black and white
+  - darkred: Dramatic dark red with pink accents
+    `);
+    process.exit(0);
+  }
+  
+  // Parse positional arguments
+  const month = args[0] && !args[0].startsWith('--') ? parseInt(args[0]) - 1 : new Date().getMonth();
+  const year = args[1] && !args[1].startsWith('--') ? parseInt(args[1]) : new Date().getFullYear();
+  const theme = args[2] && !args[2].startsWith('--') ? args[2] : 'default';
+  const layout = args[3] && !args[3].startsWith('--') ? args[3] : 'fortnight';
+  const pageSize = args[4] && !args[4].startsWith('--') ? args[4] : 'A4-portrait';
+  
+  // Parse options
+  const options = {
+    theme,
+    layout,
+    pageSize,
+    eventsFile: null,
+    imagePath: null,
+    withImage: false,
+    outputPath: null
+  };
+  
+  args.forEach(arg => {
+    if (arg.startsWith('--events=')) {
+      options.eventsFile = arg.split('=')[1];
+    } else if (arg.startsWith('--image=')) {
+      options.imagePath = arg.split('=')[1];
+      options.withImage = true;
+    } else if (arg.startsWith('--output=')) {
+      options.outputPath = arg.split('=')[1];
+    }
+  });
+  
+  console.log(`
+Generating calendar:
+  Month: ${Utils.monthNames[month]} ${year}
+  Theme: ${theme}
+  Layout: ${layout}
+  Page Size: ${pageSize}
+  ${options.eventsFile ? 'Events: ' + options.eventsFile : ''}
+  ${options.imagePath ? 'Image: ' + options.imagePath : ''}
+  `);
+  
+  generatePDF(month, year, options)
     .then(({ htmlPath, pdfPath }) => {
-      console.log('Calendar generation complete!');
+      console.log('\n✓ Calendar generation complete!');
     })
     .catch(err => {
-      console.error('Error generating calendar:', err);
+      console.error('✗ Error generating calendar:', err);
       process.exit(1);
     });
 }
-
-module.exports = { generateHTML, generatePDF };

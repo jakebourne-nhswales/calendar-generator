@@ -15,8 +15,9 @@
   "type": "commonjs",
   "main": "src/calendar-generator.js",
   "scripts": {
-    "start": "node src/calendar-generator.js",
-    "dec2025": "node src/calendar-generator.js 12 2025"
+    "fortnight": "node src/calendar-generator.js",
+    "dec2025": "node src/calendar-generator.js 12 2025",
+    "weekly": "node src/calendar-generator.js 12 2025 ocean weekly A4-landscape"
   },
   "dependencies": {
     "puppeteer": "^24.31.0"
