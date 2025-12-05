@@ -35,16 +35,37 @@ function generateHTML(month, year, options = {}) {
   
   const size = pageSizes[pageSize] || pageSizes['A4-portrait'];
   
-  // Image page HTML
+  // Image page HTML with base64 encoding
   let imagePageHTML = '';
   if (withImage && imagePath) {
-    imagePageHTML = `
-      <div class="image-page" style="width: ${size.width}; height: ${size.height};">
-        <img src="${imagePath}" alt="Calendar image" style="width: 100%; height: 100%; object-fit: cover;">
-      </div>
-      <div style="page-break-after: always;"></div>
-    `;
+    try {
+      const imageBuffer = fs.readFileSync(imagePath);
+      const imageBase64 = imageBuffer.toString('base64');
+      
+      // Determine MIME type from file extension
+      const ext = imagePath.toLowerCase().split('.').pop();
+      const mimeTypes = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp',
+        'bmp': 'image/bmp'
+      };
+      const mimeType = mimeTypes[ext] || 'image/jpeg';
+      
+      imagePageHTML = `
+        <div class="image-page" style="width: ${size.width}; height: ${size.height}; padding: 15mm; box-sizing: border-box;">
+          <img src="data:${mimeType};base64,${imageBase64}" alt="Calendar image" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px;">
+        </div>
+        <div style="page-break-after: always;"></div>
+      `;
+    } catch (err) {
+      console.error(`Error loading image: ${err.message}`);
+      imagePageHTML = '';
+    }
   }
+
   
   return `<!DOCTYPE html>
 <html lang="en">
@@ -202,16 +223,16 @@ if (require.main === module) {
   // Show help if requested
   if (args.includes('--help') || args.includes('-h')) {
     console.log(`
-Calendar Generator - Command-Line Usage
+Calendar Generator - Modular Architecture
 
 USAGE:
   node calendar-generator.js [month] [year] [theme] [layout] [pageSize] [options]
 
 ARGUMENTS:
-  month       Month number (1-12), default: current month
+  month       Month number (1-12), default: current month (ignored for year layout)
   year        Year (e.g., 2025), default: current year
   theme       Theme name: default, ocean, sunset, minimalist, darkred
-  layout      Layout name: fortnight, weekly
+  layout      Layout name: fortnight, weekly, year
   pageSize    Page size: A4-portrait, A4-landscape, A5-portrait, A5-landscape
 
 OPTIONS:
@@ -247,6 +268,7 @@ SUPPORTED SIZES:
 LAYOUTS:
   - fortnight: Two-column layout (days 1-15, days 16-end)
   - weekly: Traditional calendar grid with weeks
+  - year: 12 mini monthly grids (3×4 portrait, 4×3 landscape)
 
 THEMES:
   - default: Professional blue/gray
