@@ -158,8 +158,8 @@ function generateHTML(month, year, options = {}) {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            padding: 15px 20px;
+            margin-bottom: 10px;
+            padding: 12px 20px;
             background: var(--header-bg);
             color: var(--header-text);
             border-radius: 8px;
@@ -226,15 +226,14 @@ function generateHTML(month, year, options = {}) {
         }
 
         .calendar-content {
-            flex: 1;
             display: flex;
             flex-direction: column;
             min-height: 0;
         }
 
         .calendar-footer {
-            margin-top: 8px;
-            padding: 10px 20px;
+            margin-top: 6px;
+            padding: 8px 20px;
             display: flex;
             align-items: center;
             flex-shrink: 0;
@@ -257,8 +256,8 @@ function generateHTML(month, year, options = {}) {
         }
 
         .footer-logo {
-            max-height: 30px;
-            max-width: 120px;
+            max-height: 25px;
+            max-width: 100px;
             object-fit: contain;
         }
 

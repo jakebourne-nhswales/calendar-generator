@@ -19,6 +19,7 @@
     "dec2025": "node src/cli.js 12 2025",
     "weekly": "node src/cli.js 12 2025 ocean weekly A4-landscape",
     "weeklyA5": "node src/cli.js 03 2026 ocean weekly A5-landscape",
+    "year": "node src/cli.js 1 2026 ocean year A4-portrait",
     "api": "node src/api.js 3000"
   },
   "dependencies": {
