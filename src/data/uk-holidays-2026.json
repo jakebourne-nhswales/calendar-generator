@@ -1,0 +1,42 @@
+{
+    "01-01": {
+      "type": "public",
+      "lines": ["New Year's Day", "Bank Holiday", ""],
+      "originalYear": null
+    },
+    "04-03": {
+      "type": "public",
+      "lines": ["Good Friday", "Bank Holiday", ""],
+      "originalYear": null
+    },
+    "04-06": {
+      "type": "public",
+      "lines": ["Easter Monday", "Bank Holiday", ""],
+      "originalYear": null
+    },
+    "05-04": {
+      "type": "public",
+      "lines": ["Early May Bank Holiday", "First Monday in May", ""],
+      "originalYear": null
+    },
+    "05-25": {
+      "type": "public",
+      "lines": ["Spring Bank Holiday", "Last Monday in May", ""],
+      "originalYear": null
+    },
+    "08-31": {
+      "type": "public",
+      "lines": ["Summer Bank Holiday", "Last Monday in August", ""],
+      "originalYear": null
+    },
+    "12-25": {
+      "type": "public",
+      "lines": ["Christmas Day", "Bank Holiday", ""],
+      "originalYear": null
+    },
+    "12-28": {
+      "type": "public",
+      "lines": ["Boxing Day (substitute)", "Bank Holiday", "Observed Monday"],
+      "originalYear": null
+    }
+  }

@@ -15,10 +15,10 @@
   "type": "commonjs",
   "main": "src/calendar-generator.js",
   "scripts": {
-    "fortnight": "node src/calendar-generator.js",
-    "dec2025": "node src/calendar-generator.js 12 2025",
-    "weekly": "node src/calendar-generator.js 12 2025 ocean weekly A4-landscape",
-    "weeklyA5": "node src/calendar-generator.js 03 2026 ocean weekly A5-landscape",
+    "fortnight": "node src/cli.js",
+    "dec2025": "node src/cli.js 12 2025",
+    "weekly": "node src/cli.js 12 2025 ocean weekly A4-landscape",
+    "weeklyA5": "node src/cli.js 03 2026 ocean weekly A5-landscape",
     "api": "node src/api.js 3000"
   },
   "dependencies": {

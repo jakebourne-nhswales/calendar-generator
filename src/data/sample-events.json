@@ -5,14 +5,19 @@
     "lines": ["Sarah's Birthday", "Cake at noon", ""],
     "originalYear": 2004
   },
-  "11-14": {
+  "05-04": {
     "type": "anniversary",
     "lines": ["Wedding Anniversary", "Dinner reservation 7pm", ""],
     "originalYear": 2004
   },
   "12-25": {
-    "type": "birthday",
-    "lines": ["Christmas Day", "Family gathering", ""],
+    "type": "public",
+    "lines": ["Christmas Day", "Turkey dinner", ""],
     "originalYear": null
-  }
+  },
+  "12-26": {
+    "type": "public",
+    "lines": ["Boxing Day", "Family gathering", ""],
+    "originalYear": null
+  }  
 }

@@ -1,0 +1,87 @@
+{
+    "01-01": {
+      "type": "public",
+      "lines": ["New Year's Day", "State Holiday", ""],
+      "originalYear": null
+    },
+    "01-19": {
+      "type": "public",
+      "lines": ["Martin Luther King Jr. Day", "Confederate Heroes Day", "Third Monday in January"],
+      "originalYear": null
+    },
+    "02-16": {
+      "type": "public",
+      "lines": ["Presidents' Day", "Third Monday in February", ""],
+      "originalYear": null
+    },
+    "03-02": {
+      "type": "public",
+      "lines": ["Texas Independence Day", "State Holiday", ""],
+      "originalYear": 1836
+    },
+    "04-21": {
+      "type": "public",
+      "lines": ["San Jacinto Day", "Battle of San Jacinto", ""],
+      "originalYear": 1836
+    },
+    "05-25": {
+      "type": "public",
+      "lines": ["Memorial Day", "Last Monday in May", ""],
+      "originalYear": null
+    },
+    "06-19": {
+      "type": "public",
+      "lines": ["Juneteenth", "Emancipation Day", "State Holiday"],
+      "originalYear": 1865
+    },
+    "07-03": {
+      "type": "public",
+      "lines": ["Independence Day (observed)", "Friday", ""],
+      "originalYear": null
+    },
+    "07-04": {
+      "type": "public",
+      "lines": ["Independence Day", "State Holiday", ""],
+      "originalYear": null
+    },
+    "08-27": {
+      "type": "public",
+      "lines": ["Lyndon Baines Johnson Day", "Optional State Holiday", ""],
+      "originalYear": null
+    },
+    "09-07": {
+      "type": "public",
+      "lines": ["Labor Day", "First Monday in September", ""],
+      "originalYear": null
+    },
+    "11-11": {
+      "type": "public",
+      "lines": ["Veterans Day", "State Holiday", ""],
+      "originalYear": null
+    },
+    "11-26": {
+      "type": "public",
+      "lines": ["Thanksgiving Day", "Fourth Thursday in November", ""],
+      "originalYear": null
+    },
+    "11-27": {
+      "type": "public",
+      "lines": ["Day After Thanksgiving", "State Holiday", ""],
+      "originalYear": null
+    },
+    "12-24": {
+      "type": "public",
+      "lines": ["Christmas Eve", "Optional State Holiday", ""],
+      "originalYear": null
+    },
+    "12-25": {
+      "type": "public",
+      "lines": ["Christmas Day", "State Holiday", ""],
+      "originalYear": null
+    },
+    "12-26": {
+      "type": "public",
+      "lines": ["Day After Christmas", "Optional State Holiday", ""],
+      "originalYear": null
+    }
+  }
