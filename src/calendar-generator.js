@@ -1,7 +1,7 @@
 // calendar-generator.js
 // Install dependencies: npm install puppeteer
 
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 
 const Utils = require('./utils');
@@ -286,9 +286,51 @@ function generateHTML(month, year, options = {}) {
 }
 
 
-// ============================================================================
-// PDF GENERATOR
-// ============================================================================
+// pdfGenerator.js
+// Generate PDF from HTML using Puppeteer Core
+
+/**
+ * Find Chrome executable path
+ * Supports multiple environments (local, Docker, serverless)
+ */
+function findChrome() {
+  // Check environment variable first (allows custom configuration)
+  if (process.env.CHROME_BIN) {
+    return process.env.CHROME_BIN;
+  }
+
+  // Common Chrome paths for different operating systems
+  const chromePaths = [
+    // Linux
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    // macOS
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
+    // Windows
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    // Docker/Alpine common locations
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium-browser'
+  ];
+
+  // Find first existing Chrome executable
+  for (const chromePath of chromePaths) {
+    if (fs.existsSync(chromePath)) {
+      return chromePath;
+    }
+  }
+
+  // If no Chrome found, throw helpful error
+  throw new Error(
+      'Chrome executable not found. Please install Chrome/Chromium or set CHROME_BIN environment variable.\n' +
+      'For Docker: Install chromium package\n' +
+      'For AWS Lambda: Use chrome-aws-lambda package'
+  );
+}
+
 /**
  * Generate PDF calendar
  * @param {number} month - Month index (0-11)
@@ -307,18 +349,19 @@ async function generatePDF(month, year, options = {}) {
     imagePath = null,
     logoPath = null,
     logoPosition = 'auto',
-    logoAlign = 'right'
+    logoAlign = 'right',
+    executablePath = null // Allow override of Chrome path
   } = options;
-  
+
   if (!layout) {
     throw new Error('Layout object is required');
   }
-  
+
   // Load events if specified
   if (eventsFile) {
     Events.loadEventsFromFile(eventsFile);
   }
-  
+
   // Generate HTML
   const html = generateHTML(month, year, {
     theme,
@@ -330,22 +373,35 @@ async function generatePDF(month, year, options = {}) {
     logoPosition,
     logoAlign
   });
-  
+
   // Save HTML file
-  const htmlPath = outputPath ? outputPath.replace('.pdf', '.html') : 
-                   `calendar-${year}-${String(month + 1).padStart(2, '0')}.html`;
+  const htmlPath = outputPath ? outputPath.replace('.pdf', '.html') :
+      `calendar-${year}-${String(month + 1).padStart(2, '0')}.html`;
   fs.writeFileSync(htmlPath, html);
   console.log(`HTML saved to: ${htmlPath}`);
-  
-  // Generate PDF with Puppeteer
+
+  // Find Chrome executable
+  const chromePath = executablePath || findChrome();
+  console.log(`Using Chrome at: ${chromePath}`);
+
+  // Generate PDF with Puppeteer Core
   const browser = await puppeteer.launch({
+    executablePath: chromePath,
     headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage', // Overcome limited resource problems in containers
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu'
+    ]
   });
-  
+
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: 'networkidle0' });
-  
+
   // Determine PDF format based on pageSize
   const formatMap = {
     'A4-portrait': { format: 'A4', landscape: false },
@@ -353,9 +409,9 @@ async function generatePDF(month, year, options = {}) {
     'A5-portrait': { format: 'A5', landscape: false },
     'A5-landscape': { format: 'A5', landscape: true }
   };
-  
+
   const pdfConfig = formatMap[pageSize] || formatMap['A4-portrait'];
-  
+
   const pdfPath = outputPath || `calendar-${year}-${String(month + 1).padStart(2, '0')}.pdf`;
   await page.pdf({
     path: pdfPath,
@@ -369,13 +425,12 @@ async function generatePDF(month, year, options = {}) {
       left: '0mm'
     }
   });
-  
+
   await browser.close();
   console.log(`PDF saved to: ${pdfPath}`);
-  
+
   return { htmlPath, pdfPath };
 }
-
 
 
 module.exports = { 

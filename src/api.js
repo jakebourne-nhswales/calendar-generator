@@ -5,6 +5,7 @@ const path = require('path');
 
 const Events = require('./events');
 const Themes = require('./themes');
+const Layouts = require('./layouts');
 
 const { generatePDF, generateHTML } = require('./calendar-generator');
 
@@ -51,7 +52,7 @@ function createAPIServer(port = 3000) {
   app.get('/api/options', (req, res) => {
     res.json({
       themes: Themes.getThemeNames(),
-      layouts: Object.keys(LAYOUTS),
+      layouts: Object.keys(Layouts),
       pageSizes: ['A4-portrait', 'A4-landscape', 'A5-portrait', 'A5-landscape'],
       formats: ['pdf', 'html'],
       logoPositions: ['header', 'footer', 'auto'],
@@ -81,15 +82,15 @@ function createAPIServer(port = 3000) {
         return res.status(400).json({ error: 'Month must be between 1 and 12' });
       }
       
-      if (!LAYOUTS[layout]) {
+      if (!Layouts[layout]) {
         return res.status(400).json({ 
-          error: `Invalid layout. Available: ${Object.keys(LAYOUTS).join(', ')}` 
+          error: `Invalid layout. Available: ${Object.keys(Layouts).join(', ')}`
         });
       }
       
       const options = {
         theme,
-        layout: LAYOUTS[layout],
+        layout: Layouts[layout],
         pageSize,
         withImage: false,
         imagePath: null,
@@ -150,9 +151,9 @@ function createAPIServer(port = 3000) {
         return res.status(400).json({ error: 'Month must be between 1 and 12' });
       }
       
-      if (!LAYOUTS[layout]) {
+      if (!Layouts[layout]) {
         return res.status(400).json({ 
-          error: `Invalid layout. Available: ${Object.keys(LAYOUTS).join(', ')}` 
+          error: `Invalid layout. Available: ${Object.keys(Layouts).join(', ')}`
         });
       }
       
@@ -168,7 +169,7 @@ function createAPIServer(port = 3000) {
       
       const options = {
         theme,
-        layout: LAYOUTS[layout],
+        layout: Layouts[layout],
         pageSize,
         withImage: false,
         imagePath: null,
