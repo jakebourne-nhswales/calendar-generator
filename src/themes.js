@@ -16,6 +16,7 @@ const Themes = {
         --header-text: #ffffff;
         --weekend-bg: #ecf0f1;
         --today-bg: #fff3cd;
+        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
     `
   },
@@ -34,6 +35,7 @@ const Themes = {
         --header-text: #ffffff;
         --weekend-bg: #e8f4f8;
         --today-bg: #d4edda;
+        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
     `
   },
@@ -52,6 +54,7 @@ const Themes = {
         --header-text: #ffffff;
         --weekend-bg: #fdebd0;
         --today-bg: #ffe5cc;
+        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
     `
   },
@@ -70,6 +73,7 @@ const Themes = {
         --header-text: #000000;
         --weekend-bg: #fafafa;
         --today-bg: #e8e8e8;
+        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
     `
   },
@@ -88,6 +92,7 @@ const Themes = {
         --header-text: #FFB6C1;
         --weekend-bg: #ecf0f1;
         --today-bg: #fff3cd;
+        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
       
       .theme-darkred .day-info {
