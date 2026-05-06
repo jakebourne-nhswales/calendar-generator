@@ -132,7 +132,7 @@ function generateHTML(month, year, options = {}) {
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-family);
             color: var(--text-color);
         }
 
