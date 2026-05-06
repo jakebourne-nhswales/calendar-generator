@@ -71,6 +71,7 @@ const Events = {
     const processedLines = this.processEventText(this.events[dateKey], year);
     const eventLines = processedLines
       .filter(line => line.trim())
+      .slice(0, 2)
       .map(line => `<div class="event-line ${this.events[dateKey].type}">${line}</div>`)
       .join('');
     return `<div class="events-card">${eventLines}</div>`;
