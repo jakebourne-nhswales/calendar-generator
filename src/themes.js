@@ -5,6 +5,8 @@ const Themes = {
   default: {
     name: 'Default',
     css: `
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+      
       :root {
         --primary-color: #2c3e50;
         --secondary-color: #3498db;
@@ -16,7 +18,7 @@ const Themes = {
         --header-text: #ffffff;
         --weekend-bg: #ecf0f1;
         --today-bg: #fff3cd;
-        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
     `
   },
@@ -24,6 +26,8 @@ const Themes = {
   ocean: {
     name: 'Ocean',
     css: `
+      @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;700&display=swap');
+      
       .theme-ocean {
         --primary-color: #006994;
         --secondary-color: #00a8cc;
@@ -35,7 +39,7 @@ const Themes = {
         --header-text: #ffffff;
         --weekend-bg: #e8f4f8;
         --today-bg: #d4edda;
-        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --font-family: 'Lato', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
     `
   },
@@ -43,6 +47,8 @@ const Themes = {
   sunset: {
     name: 'Sunset',
     css: `
+      @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap');
+      
       .theme-sunset {
         --primary-color: #c0392b;
         --secondary-color: #e67e22;
@@ -54,7 +60,7 @@ const Themes = {
         --header-text: #ffffff;
         --weekend-bg: #fdebd0;
         --today-bg: #ffe5cc;
-        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
     `
   },
@@ -62,6 +68,8 @@ const Themes = {
   minimalist: {
     name: 'Minimalist',
     css: `
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+      
       .theme-minimalist {
         --primary-color: #000000;
         --secondary-color: #555555;
@@ -73,7 +81,7 @@ const Themes = {
         --header-text: #000000;
         --weekend-bg: #fafafa;
         --today-bg: #e8e8e8;
-        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
     `
   },
@@ -81,6 +89,8 @@ const Themes = {
   darkred: {
     name: 'Dark Red',
     css: `
+      @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700;900&display=swap');
+      
       .theme-darkred {
         --primary-color: #8B0000;
         --secondary-color: #A52A2A;
@@ -92,7 +102,7 @@ const Themes = {
         --header-text: #FFB6C1;
         --weekend-bg: #ecf0f1;
         --today-bg: #fff3cd;
-        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --font-family: 'Playfair Display', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
       
       .theme-darkred .day-info {
