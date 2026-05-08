@@ -71,7 +71,19 @@ const Utils = {
     }
     
     return weeks;
-  }
+  },
+
+  
+  async getImageDimensions(imagePath) {
+    const result = await probeImageSize.fromFile(imagePath);
+    return {
+      width: result.width,
+      height: result.height,
+      isPortrait: result.height > result.width,
+      isLandscape: result.width > result.height
+    };
+  }  
+
 };
 
 module.exports = Utils;

@@ -7,7 +7,6 @@ const fs = require('fs');
 const Utils = require('./utils');
 const Events = require('./events');
 const Themes = require('./themes');
-const Layouts = require('./layouts');
 
 
 // ============================================================================
@@ -29,7 +28,8 @@ function generateHTML(month, year, options = {}) {
     imagePath = null,
     logoPath = null,
     logoPosition = 'auto',
-    logoAlign = 'right'
+    logoAlign = 'right',
+    imageDimensions = null
   } = options;
   
   if (!layout) {
@@ -89,7 +89,9 @@ function generateHTML(month, year, options = {}) {
     try {
       const imageBuffer = fs.readFileSync(imagePath);
       const imageBase64 = imageBuffer.toString('base64');
-      
+  
+      //const isPortraitImage = options.imageDimensions.height > options.imageDimensions.width;
+
       const ext = imagePath.toLowerCase().split('.').pop();
       const mimeTypes = {
         'jpg': 'image/jpeg',
@@ -103,7 +105,7 @@ function generateHTML(month, year, options = {}) {
       
       imagePageHTML = `
         <div class="image-page" style="width: ${size.width}; height: ${size.height}; padding: 15mm; box-sizing: border-box;">
-          <img src="data:${mimeType};base64,${imageBase64}" alt="Calendar image" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px;">
+          <img src="data:${mimeType};base64,${imageBase64}" alt="Calendar image ${year}-${month}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px;">
         </div>
         <div style="page-break-after: always;"></div>
       `;
@@ -357,6 +359,16 @@ async function generatePDF(month, year, options = {}) {
     throw new Error('Layout object is required');
   }
 
+  // Preload image dimensions
+  let imageDimensions = null;
+  if (withImage && imagePath) {
+    /*try {
+      imageDimensions = await Utils.getImageDimensions(imagePath);
+    } catch (err) {
+      console.error(`Error loading image dimensions: ${err.message}`);
+    }*/
+  }
+
   // Load events if specified
   if (eventsFile) {
     Events.loadEventsFromFile(eventsFile);
@@ -371,7 +383,8 @@ async function generatePDF(month, year, options = {}) {
     imagePath,
     logoPath,
     logoPosition,
-    logoAlign
+    logoAlign,
+    imageDimensions
   });
 
   // Save HTML file
