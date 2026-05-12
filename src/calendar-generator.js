@@ -52,11 +52,11 @@ function generateHTML(month, year, options = {}) {
   
   let size = pageSizes[pageSize] || pageSizes['A4-portrait'];
   
-  // NEW: Auto-adjust to A3 landscape if facing pages with image
+  // NEW: Auto-adjust to A3 portrait if facing pages with image (rotated 90 degrees)
   let finalPageSize = pageSize;
   if (withImage && imagePath && facingPages) {
-    finalPageSize = 'A3-landscape';
-    size = pageSizes['A3-landscape'];
+    finalPageSize = 'A3-portrait';
+    size = pageSizes['A3-portrait'];
   }
   
   // Determine logo placement
@@ -112,12 +112,12 @@ function generateHTML(month, year, options = {}) {
       };
       const mimeType = mimeTypes[ext] || 'image/jpeg';
       
-      // Half the width for A3 landscape (210mm each for left/right pages)
-      const halfWidth = '210mm';
-      const pageHeight = '297mm';
+      // Half the height for A3 portrait (148.5mm each for top/bottom pages)
+      const halfHeight = '148.5mm';
+      const pageWidth = '297mm';
       
       imagePageHTML = `
-        <div class="image-page-spread" style="width: ${halfWidth}; height: ${pageHeight}; padding: 15mm; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+        <div class="image-page-spread" style="width: ${pageWidth}; height: ${halfHeight}; padding: 15mm; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
           <img src="data:${mimeType};base64,${imageBase64}" alt="Calendar image ${year}-${month}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px;">
         </div>
       `;
@@ -177,28 +177,29 @@ function generateHTML(month, year, options = {}) {
             color: var(--text-color);
         }
 
-        /* NEW: Facing pages spread container */
+        /* NEW: Facing pages spread container (rotated 90 degrees - vertical stacking) */
         .facing-pages-spread {
             display: flex;
+            flex-direction: column;
             width: ${size.width};
             height: ${size.height};
             background: var(--background-color);
             page-break-inside: avoid; /* Keep spread together */
         }
 
-        .spread-left-page {
-            width: 50%;
-            height: 100%;
+        .spread-top-page {
+            width: 100%;
+            height: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             background: #f0f0f0;
-            border-right: 1px solid #ddd; /* Visual separator */
+            border-bottom: 1px solid #ddd; /* Visual separator */
         }
 
-        .spread-right-page {
-            width: 50%;
-            height: 100%;
+        .spread-bottom-page {
+            width: 100%;
+            height: 50%;
             display: flex;
             flex-direction: column;
             padding: 15mm;
@@ -351,13 +352,13 @@ function generateHTML(month, year, options = {}) {
     </style>
 </head>
 <body>
-    <!-- NEW: Facing pages spread layout -->
+    <!-- NEW: Facing pages spread layout (rotated 90 degrees) -->
     ${withImage && imagePath && facingPages ? `
     <div class="facing-pages-spread">
-        <div class="spread-left-page">
+        <div class="spread-top-page">
             ${imagePageHTML}
         </div>
-        <div class="spread-right-page">
+        <div class="spread-bottom-page">
             <div class="calendar-container spread-variant ${themeClass}">
                 <div class="calendar-header ${finalLogoPosition === 'header' && logoHTML ? 'with-logo-' + logoAlign : ''}">
                     ${finalLogoPosition === 'header' && logoAlign === 'left' ? logoHTML : ''}
@@ -529,7 +530,7 @@ async function generatePDF(month, year, options = {}) {
   // NEW: Determine PDF format based on facing pages layout
   let pdfFormat = pageSize;
   if (withImage && imagePath && facingPages) {
-    pdfFormat = 'A3-landscape';
+    pdfFormat = 'A3-portrait';
   }
 
   // Determine PDF format based on pageSize
