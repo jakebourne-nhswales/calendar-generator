@@ -29,7 +29,8 @@ function generateHTML(month, year, options = {}) {
     logoPath = null,
     logoPosition = 'auto',
     logoAlign = 'right',
-    imageDimensions = null
+    imageDimensions = null,
+    facingPages = false // NEW: Enable facing page spread layout
   } = options;
   
   if (!layout) {
@@ -39,14 +40,24 @@ function generateHTML(month, year, options = {}) {
   const themeClass = theme === 'default' ? '' : `theme-${theme}`;
   
   // Page size configurations
+  // NEW: Added A3 sizes for double-page spreads
   const pageSizes = {
     'A4-portrait': { width: '210mm', height: '297mm' },
     'A4-landscape': { width: '297mm', height: '210mm' },
     'A5-portrait': { width: '148mm', height: '210mm' },
-    'A5-landscape': { width: '210mm', height: '148mm' }
+    'A5-landscape': { width: '210mm', height: '148mm' },
+    'A3-landscape': { width: '420mm', height: '297mm' }, // NEW: Two A4 pages side-by-side
+    'A3-portrait': { width: '297mm', height: '420mm' }     // NEW: Two A4 pages stacked
   };
   
-  const size = pageSizes[pageSize] || pageSizes['A4-portrait'];
+  let size = pageSizes[pageSize] || pageSizes['A4-portrait'];
+  
+  // NEW: Auto-adjust to A3 landscape if facing pages with image
+  let finalPageSize = pageSize;
+  if (withImage && imagePath && facingPages) {
+    finalPageSize = 'A3-landscape';
+    size = pageSizes['A3-landscape'];
+  }
   
   // Determine logo placement
   let finalLogoPosition = logoPosition;
@@ -83,14 +94,42 @@ function generateHTML(month, year, options = {}) {
     }
   }
   
-  // Process image page if provided
+  // NEW: Process image for facing pages layout
   let imagePageHTML = '';
-  if (withImage && imagePath) {
+  if (withImage && imagePath && facingPages) {
     try {
       const imageBuffer = fs.readFileSync(imagePath);
       const imageBase64 = imageBuffer.toString('base64');
-  
-      //const isPortraitImage = options.imageDimensions.height > options.imageDimensions.width;
+      
+      const ext = imagePath.toLowerCase().split('.').pop();
+      const mimeTypes = {
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png',
+        'gif': 'image/gif',
+        'webp': 'image/webp',
+        'bmp': 'image/bmp'
+      };
+      const mimeType = mimeTypes[ext] || 'image/jpeg';
+      
+      // Half the width for A3 landscape (210mm each for left/right pages)
+      const halfWidth = '210mm';
+      const pageHeight = '297mm';
+      
+      imagePageHTML = `
+        <div class="image-page-spread" style="width: ${halfWidth}; height: ${pageHeight}; padding: 15mm; box-sizing: border-box; display: flex; align-items: center; justify-content: center;">
+          <img src="data:${mimeType};base64,${imageBase64}" alt="Calendar image ${year}-${month}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 4px;">
+        </div>
+      `;
+    } catch (err) {
+      console.error(`Error loading image: ${err.message}`);
+    }
+  } 
+  // ORIGINAL: Process image as separate page if not facing pages layout
+  else if (withImage && imagePath) {
+    try {
+      const imageBuffer = fs.readFileSync(imagePath);
+      const imageBase64 = imageBuffer.toString('base64');
 
       const ext = imagePath.toLowerCase().split('.').pop();
       const mimeTypes = {
@@ -124,7 +163,7 @@ function generateHTML(month, year, options = {}) {
     <style>
         @page {
             size: ${size.width} ${size.height};
-            margin: 15mm;
+            margin: 0; /* Changed to 0 for spread layout */
         }
 
         * {
@@ -138,12 +177,48 @@ function generateHTML(month, year, options = {}) {
             color: var(--text-color);
         }
 
+        /* NEW: Facing pages spread container */
+        .facing-pages-spread {
+            display: flex;
+            width: ${size.width};
+            height: ${size.height};
+            background: var(--background-color);
+            page-break-inside: avoid; /* Keep spread together */
+        }
+
+        .spread-left-page {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+            border-right: 1px solid #ddd; /* Visual separator */
+        }
+
+        .spread-right-page {
+            width: 50%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 15mm;
+            overflow: hidden;
+        }
+
         .image-page {
             background: #f0f0f0;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto;
+        }
+
+        /* NEW: Image within spread */
+        .image-page-spread {
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .calendar-container {
@@ -154,6 +229,14 @@ function generateHTML(month, year, options = {}) {
             margin: 0 auto;
             display: flex;
             flex-direction: column;
+        }
+
+        /* NEW: Calendar container within spread */
+        .calendar-container.spread-variant {
+            width: 100%;
+            height: 100%;
+            padding: 15mm;
+            background: transparent;
         }
 
         .calendar-header {
@@ -264,10 +347,35 @@ function generateHTML(month, year, options = {}) {
         }
 
         ${Themes.getAllThemesCSS()}
-        ${layout.getCSS(pageSize)}
+        ${layout.getCSS(finalPageSize)} /* NEW: Use finalPageSize */
     </style>
 </head>
 <body>
+    <!-- NEW: Facing pages spread layout -->
+    ${withImage && imagePath && facingPages ? `
+    <div class="facing-pages-spread">
+        <div class="spread-left-page">
+            ${imagePageHTML}
+        </div>
+        <div class="spread-right-page">
+            <div class="calendar-container spread-variant ${themeClass}">
+                <div class="calendar-header ${finalLogoPosition === 'header' && logoHTML ? 'with-logo-' + logoAlign : ''}">
+                    ${finalLogoPosition === 'header' && logoAlign === 'left' ? logoHTML : ''}
+                    <div class="calendar-header-content">
+                        <h1>${Utils.monthNames[month]}</h1>
+                        <div class="year">${year}</div>
+                    </div>
+                    ${finalLogoPosition === 'header' && (logoAlign === 'right' || logoAlign === 'center') ? logoHTML : ''}
+                </div>
+                <div class="calendar-content">
+                    ${layout.generateLayout(month, year, { ...options, pageSize: finalPageSize })}
+                </div>
+                ${finalLogoPosition === 'footer' && logoHTML ? `<div class="calendar-footer logo-align-${logoAlign}">${logoHTML}</div>` : ''}
+            </div>
+        </div>
+    </div>
+    ` : `
+    <!-- ORIGINAL: Single page layout -->
     ${imagePageHTML}
     <div class="calendar-container ${themeClass}">
         <div class="calendar-header ${finalLogoPosition === 'header' && logoHTML ? 'with-logo-' + logoAlign : ''}">
@@ -283,6 +391,7 @@ function generateHTML(month, year, options = {}) {
         </div>
         ${finalLogoPosition === 'footer' && logoHTML ? `<div class="calendar-footer logo-align-${logoAlign}">${logoHTML}</div>` : ''}
     </div>
+    `}
 </body>
 </html>`;
 }
@@ -352,6 +461,7 @@ async function generatePDF(month, year, options = {}) {
     logoPath = null,
     logoPosition = 'auto',
     logoAlign = 'right',
+    facingPages = false, // NEW: Enable facing page spread
     executablePath = null // Allow override of Chrome path
   } = options;
 
@@ -384,6 +494,7 @@ async function generatePDF(month, year, options = {}) {
     logoPath,
     logoPosition,
     logoAlign,
+    facingPages, // NEW: Pass facing pages option
     imageDimensions
   });
 
@@ -415,15 +526,23 @@ async function generatePDF(month, year, options = {}) {
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: 'networkidle0' });
 
+  // NEW: Determine PDF format based on facing pages layout
+  let pdfFormat = pageSize;
+  if (withImage && imagePath && facingPages) {
+    pdfFormat = 'A3-landscape';
+  }
+
   // Determine PDF format based on pageSize
   const formatMap = {
     'A4-portrait': { format: 'A4', landscape: false },
     'A4-landscape': { format: 'A4', landscape: true },
     'A5-portrait': { format: 'A5', landscape: false },
-    'A5-landscape': { format: 'A5', landscape: true }
+    'A5-landscape': { format: 'A5', landscape: true },
+    'A3-landscape': { format: 'A3', landscape: true },
+    'A3-portrait': { format: 'A3', landscape: false }
   };
 
-  const pdfConfig = formatMap[pageSize] || formatMap['A4-portrait'];
+  const pdfConfig = formatMap[pdfFormat] || formatMap['A4-portrait'];
 
   const pdfPath = outputPath || `calendar-${year}-${String(month + 1).padStart(2, '0')}.pdf`;
   await page.pdf({
