@@ -42,8 +42,9 @@ const WeeklyLayout = {
    */
   generateLayout(month, year, options = {}) {
     const weeks = Utils.getWeeksInMonth(year, month);
+    const weekCount = weeks.length;
     
-    let html = '<div class="weekly-grid">';
+    let html = `<div class="weekly-grid ${weekCount === 6 ? 'six-weeks' : ''}">`;
     
     // Day headers
     html += '<div class="week-headers">';
@@ -102,6 +103,10 @@ const WeeklyLayout = {
     
     const config = sizeConfig[pageSize] || sizeConfig['A4-portrait'];
     
+    // Parse cellHeight to calculate reduced height for six-week months
+    const cellHeightValue = parseInt(config.cellHeight);
+    const reducedCellHeight = (cellHeightValue - 5) + 'px';
+    
     return `
       .weekly-grid {
         display: flex;
@@ -149,6 +154,10 @@ const WeeklyLayout = {
         flex-direction: column;
         min-height: ${config.cellHeight};
         position: relative;
+      }
+      
+      .six-weeks .week-day {
+        min-height: ${reducedCellHeight};
       }
       
       .week-day.empty {
